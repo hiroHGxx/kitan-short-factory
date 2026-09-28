@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "short-video-factory/script.schema.json",
+  "title": "Episode script",
+  "description": "1エピソード分の台本。generate.mjs(ComfyUI投入)と render.mjs(Remotion編集)の両方がこのファイルを読む。",
+  "type": "object",
+  "required": ["title", "episode_slug", "cuts", "render"],
+  "additionalProperties": false,
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "作品タイトル。render.title.text が未指定ならこれをエンディングタイトルに使う"
+    },
+    "episode_slug": {
+      "type": "string",
+      "pattern": "^ep[0-9]{3}_[a-z0-9-]+$",
+      "description": "エピソードID。フォルダ名・出力mp4名と一致させる (例: ep001_chiisana-ichinichi)"
+    },
+    "concept": {
+      "type": "string",
+      "description": "作品の意図・ねらい・見どころ(日本語数文)。SNS投稿文の材料。render.mjs が out/{episode_slug}_notes.md に転記する"
+    },
+    "resolution": {
+      "type": "object",
+      "description": "ComfyUI ResolutionSelector の設定(省略時は雛形JSONのまま)",
+      "additionalProperties": false,
+      "properties": {
+        "aspect_ratio": {
+          "type": "string",
+          "description": "例: \"1:1 (Square)\", \"9:16 (Portrait Widescreen)\""
+        },
+        "megapixels": { "type": "number" }
+      }
+    },
+    "cuts": {
+      "type": "array",
+      "minItems": 1,
+      "description": "再生順のカット定義。N番目のカットの生成物は assets/cut{N}_{slug}.mp4",
+      "items": {
+        "type": "object",
+        "required": ["slug", "telop", "h3_prompt", "input_image", "seed", "duration_sec"],
+        "additionalProperties": false,
+        "properties": {
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$",
+            "description": "カット識別子。ファイル名と --only 指定に使う"
+          },
+          "telop": {
+            "type": "string",
+            "description": "場面名テロップ。短い体言止め (例: 「あさ。」)"
+          },
+          "h3_prompt": {
+            "type": "string",
+            "description": "MiniMax H3 用プロンプト。templates/h3_prompt_template.md の定型構造に従う"
+          },
+          "input_image": {
+            "type": "string",
+            "description": "起点画像(first_frame)。エピソードフォルダからの相対パス (例: inputs/base.jpg)"
+          },
+          "seed": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "noise_seed。破綻カットはこの値だけ変えて再生成する"
+          },
+          "duration_sec": {
+            "type": "number",
+            "minimum": 1,
+            "description": "生成尺(秒)。通常10。実際のフレーム数はComfyUI側で17の倍数系に丸められ、10秒指定→10.125秒になる"
+          },
+          "dialogue": {
+            "type": "string",
+            "description": "セリフ・人間チェック用メモ(生成には使われない)"
+          },
+          "telop_start_sec": {
+            "type": "number",
+            "description": "カット先頭からテロップ表示開始までの秒数。省略時: 先頭カットは0、以降はクロスフェード明け"
+          }
+        }
+      }
+    },
+    "render": {
+      "type": "object",
+      "description": "Remotion編集設定",
+      "required": ["crossfade_sec", "final_fadeout_sec"],
+      "additionalProperties": false,
+      "properties": {
+        "crossfade_sec": {
+          "type": "number",
+          "description": "カット間クロスフェード秒数(映像・音声とも)。既定は0.5"
+        },
+        "final_fadeout_sec": {
+          "type": "number",
+          "description": "動画全体の末尾フェードアウト秒数。既定は1.5"
+        },
+        "layout": {
+          "type": "string",
+          "enum": ["square", "fullbleed"],
+          "description": "square(既定): 1:1動画を中央配置+上下クリーム余白 / fullbleed: 9:16動画を画面いっぱいに表示しテロップをオーバーレイ(ep007で導入)"
+        },
+        "telop": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "duration_sec": { "type": "number", "description": "各テロップの表示秒数。既定2.5" },
+            "font_size": { "type": "number", "description": "既定64" }
+          }
+        },
+        "title": {
+          "type": "object",
+          "description": "エンディングタイトル表示",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean", "description": "既定true" },
+            "text": { "type": "string", "description": "省略時はエピソードのtitleを使う" },
+            "duration_sec": { "type": "number", "description": "末尾からの表示秒数。既定2" },
+            "font_size": { "type": "number", "description": "既定44" }
+          }
+        }
+      }
+    }
+  }
+}

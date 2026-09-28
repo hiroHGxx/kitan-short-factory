@@ -1,0 +1,21 @@
+# 依存関係
+renderer/node_modules/
+
+# 生成メディア(再生成可能 or サイズ大。バックアップはディスク側で行う)
+episodes/*/inputs/
+episodes/*/assets/
+episodes/*/out/
+episodes/*/check/
+renderer/out/
+
+# デバッグ用スクリーンショット等
+debug/
+
+# work内の大きいバイナリ(テキストのドラフト類・絵コンテ等のPNG参考資料は追跡する)
+work/**/*.zip
+work/**/*.mp4
+work/**/*.wav
+work/**/*.mp3
+
+# その他
+*.log
