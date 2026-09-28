@@ -1,61 +1,89 @@
-# h3_prompt 定型構造
+# h3_prompt 定型構造(月蝕綺譚・Ref2VA+AddGuide 標準)
 
-MiniMax H3 (i2v) 用プロンプトは必ずこの6ブロック構成・この順で書く。
-英語で書き、日本語セリフだけ「」内に日本語で書く。
+本作の標準経路は `generate.mjs --ref2v`(D案: 起点画像を1フレーム目に固定+正典シート/公式ボイスを参照)。
+h3_prompt は必ずこの7ブロック構成・この順で書く。英語で書き、日本語セリフだけ「」内に日本語で書く。
+(i2v の `--turbo` で使う場合は 2. References を省き、1. の `as <Picture 1>` を `of the input image` に戻す)
 
 ```
 <1. 画風維持文>
 
-Scene: <2. 場面説明>
+<2. References(参照の役割割り当て)>
+
+Scene: <3. 場面説明>
 
 Motion storyboard:
 [0s-Ns] <動き>
 [Ns-Ms] <動き>
 ...
 
-Camera: <3. カメラ>
+Camera: <4. カメラ>
 
-Audio: <4. 音声設計>
+Audio: <5. 音声設計>
 
-<5. ネガティブ指示>
+<6. ネガティブ指示>
 ```
 
 ## 各ブロックのルール
 
 ### 1. 画風維持文(冒頭・固定文)
-毎回ほぼこのまま使う:
+公式の画像生成アンカー(`get_design_tone` の image_prompt)由来。キャラの塗りは正典のまま、世界の側を「宵闇に金」にする:
 
-> Soft watercolor anime illustration style, keep the exact same hand-painted
-> watercolor texture, soft pastel colors, paper grain and gentle lighting of
-> the input image throughout. Do not change the character design or art style.
+> Clean anime cel illustration, with the exact same clean line art, light soft cel shading and
+> character coloring as <Picture 1>. Elegant Japanese dark fantasy: deep indigo-black night
+> (#16162a), gold accents only as thin lines and tiny drifting particles (maki-e lacquerware
+> feeling), dark-purple night sakura, silver mist. Do not change the character design or art style.
 
-### 2. Scene
+### 2. References(固定文。cut.refs の並び順と対応させる)
+refs.images = [正典立ち絵, 三面図シート]、refs.audios = [ボイス見本] のとき:
+
+> References: <Picture 1> (full-body front view) and <Picture 2> (turnaround sheet and facial
+> expressions) are the character reference for the girl: use them for her face, hairstyle, eye
+> color and outfit only, ignore their plain background. <Audio 1> is the reference for her voice:
+> she speaks with the same voice timbre as <Audio 1>.
+
+- 正典シートの背景(白・緑)は「ignore their plain background」で無視させる
+- ボイス見本は `get_spirit` の voice_sample。**kind=irodori(WAV配布)のキャラのみ参照できる**。
+  kind=elevenlabs(於兎など)は WAV が無いので refs.audios を空にし、声は言葉で指定する
+
+### 3. Scene
 起点画像に写っているものを具体的に再記述する(キャラの特徴・服装・場所)。
-画像任せにせず言葉でも固定するのが画風・キャラ維持のコツ。
+画像任せにせず言葉でも固定するのが画風・キャラ維持のコツ。起点画像と食い違う記述はしない
+(ep000: 起点画像の月が「黒く欠けた月蝕」だったので Scene 側を合わせた)。
 
-### 3. Motion storyboard(秒数区切り)
-- 10秒尺なら 3〜4 区間に分ける(例: [0s-3s] / [3s-6s] / [6s-8s] / [8s-10s])
-- 1区間1アクション。動きは小さく・ゆっくりを基本にする(破綻防止)
-- セリフがある場合はこのブロック内でタイミングを指定する:
-  `and at 6.5s says in Japanese in a bright playful voice: 「いってらっしゃーい！」`
+### 4. Motion storyboard(秒数区切り)
+- 10秒尺なら 3〜4 区間に分ける(例: [0s-3s] / [3s-5s] / [5s-9s] / [9s-10s])
+- 1区間1アクション。動きは小さく・ゆっくり(公式トンマナも「お淑やかに」: 呼吸・瞬き・なびきのみ)
+- セリフはこのブロック内でタイミング・声質を指定する:
+  `and at 5.5s says in Japanese in a bright, clear, confident young woman's voice with natural falling intonation: 「…」`
+- **セリフは5.5秒開始なら3〜4秒で言い切れる長さに**(10秒に収まらないと途中で切れる)
+- **セリフ冒頭に「あ、」等の一拍を付けない**。Ref2VA では「あ、」が二重に響き、後続語の誤発音
+  (「来た来た」→「来たが来た」)を誘発した(ep000)。付けなくても口は自然に動く
+- 誤読しやすい語は読みを添える: `(来た来た is pronounced "kita kita")`
 
-### 4. Camera
-static / very slow pan / low angle など控えめに1文。激しいカメラワークは破綻しやすい。
+### 5. Camera
+static / very slight slow push-in など控えめに1文。激しいカメラワークは破綻しやすい。
 
-### 5. Audio
-効果音 + 環境音 + BGMの雰囲気 + セリフの再掲(タイミング付き)を1段落で:
+### 6. Audio
+環境音 + BGMの雰囲気 + セリフの再掲(タイミング付き)を1段落で。公式トンマナの音は「静寂が地。
+低い鈴・柝・水滴系。祭囃子NG」:
 
-> Audio: gentle flowing stream and soft water ripples, light birdsong and a
-> faint breeze through grass, a nostalgic soft music-box melody underneath.
-> Her line 「いってらっしゃーい！」 at 6.5s with a slight echo of open air.
+> Audio: quiet night ambience, soft rustle of sakura branches in the wind, a faint low bell far
+> away, a calm koto-like melody underneath. Her line 「…」 at 5.5s, close and clear.
 
-### 6. ネガティブ指示(末尾・固定文)
+### 7. ネガティブ指示(末尾・固定文)
 
-> No text, subtitles, logos or watermarks. Keep the watercolor illustration
-> look from the first frame to the last frame, do not become photorealistic,
-> do not change the character design.
+> No text, subtitles, logos or watermarks. Keep the clean anime cel look from the first frame to
+> the last frame, no bright festival red, no pale pink or white sakura, no blue sky, no daytime,
+> no white background, do not become photorealistic, do not change the character design.
 
-## 既知の破綻パターンと対策(ep003で実証)
+## Ref2VA 固有の注意(ep000 検証で判明)
+
+- **起点画像なし(B案)だとトーンが言葉で制御できない**: 桜が淡いピンク〜白、空が青くなり、カメラが引いて全身になる。
+  色指定(#5C4470 等)やネガティブ指示を強めても変わらなかった → 起点画像を AddGuide で固定する(D案)
+- **発音は完璧ではない**: 助詞の混入(餡音「お団子が食べようよ」)、片言・不自然なイントネーション(ナルカのお嬢様口調)が出ることがある。
+  チェックで判定し、seed 変更やセリフ言い換えでリテイクする。文字起こし(whisper)は冒頭語を落とすので判定は耳で行う
+
+## 既知の破綻パターンと対策(姉妹プロジェクト ep003〜 i2vで実証。Ref2VAでも参考)
 
 - **起点画像に写っていない小道具は浮く・出現が破綻する**(例: 傘)。
   props は極力書かない。書くなら起点画像に写っているものだけにする
@@ -78,5 +106,5 @@ static / very slow pan / low angle など控えめに1文。激しいカメラ�
 
 ## 完全な実例
 
-comfyui/video_minimax_h3_i2v.json の `105:104`.inputs.prompt に入っている
-「紙の舟」カットが上記構造の実例そのもの。迷ったらそれを開いて参照する。
+`episodes/ep000_sakuya-engawa/script.json` の cut1(咲耶・縁側)が上記7ブロック構造+`refs` 指定の実例そのもの
+(検証で採用した D案の最終形)。迷ったらそれを開いて参照する。

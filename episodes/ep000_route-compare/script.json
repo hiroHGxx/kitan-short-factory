@@ -1,0 +1,46 @@
+{
+  "title": "経路比較(B/D)",
+  "episode_slug": "ep000_route-compare",
+  "concept": "生成経路の比較検証用(非公開)。3キャラ(餡音・イズナ・ナルカ)で B: Ref2VA と D: Ref2VA+AddGuide(1フレーム目固定) を同条件で生成し、声の一致・リップシンク・トーン・構図を比べる。ep000_sakuya-engawa の続き。",
+  "resolution": {
+    "aspect_ratio": "9:16 (Portrait Widescreen)",
+    "megapixels": 0.4
+  },
+  "cuts": [
+    {
+      "slug": "anne",
+      "telop": "茶屋の軒先。",
+      "h3_prompt": "Clean anime cel illustration, keep the exact same clean line art, light soft cel shading and character coloring of the input image throughout. Elegant Japanese dark fantasy: deep indigo-black night (#16162a), gold accents only as thin lines and tiny drifting particles (maki-e lacquerware feeling), dark-purple night sakura, silver mist. Do not change the character design or art style.\n\nScene: A cheerful girl with short brown hair tied up in a small topknot, straight bangs, soft dark-gray eyes, wearing a long-sleeved moss-green kimono-style tunic with black collar and cuffs, a dark green obi tied in a bow, a thick chunky red knitted scarf with fringe, black tights and black tabi boots. She stands under the dark wooden eaves of a closed old teahouse at night, warm dim light from a paper window behind her, a dark-purple night sakura branch hanging over the eaves, a few petals drifting.\n\nMotion storyboard:\n[0s-3s] She stands facing slightly away in three-quarter view, gazing at the drifting petals, swaying a little in a relaxed, easygoing way, calm breathing.\n[3s-5s] She notices someone, turns her head and upper body toward the camera, her face brightening into a smile.\n[5s-9s] She tilts her head happily and clasps her hands in front of her chest, and at 5.5s says in Japanese in a bright, relaxed, easygoing young girl's voice with slow drawn-out word endings, with natural falling intonation: 「おなかすいたねえ。お団子、食べようよう」\n[9s-10s] She holds the smile, a few gold particles drift past.\n\nCamera: static medium shot (knees up), very slight slow push-in.\n\nAudio: quiet night ambience, soft rustle of the wind, a faint low bell far away, a calm koto-like melody underneath. Her line 「おなかすいたねえ。お団子、食べようよう」 at 5.5s, close and clear.\n\nNo text, subtitles, logos or watermarks. Keep the clean anime cel look from the first frame to the last frame, no bright festival red, no pale pink or white sakura, no blue sky, no daytime, no white background, do not become photorealistic, do not change the character design.",
+      "input_image": "inputs/cut1_anne.png",
+      "seed": 20260928,
+      "duration_sec": 10,
+      "dialogue": "5.5s 「おなかすいたねえ。お団子、食べようよう」"
+    },
+    {
+      "slug": "izuna",
+      "telop": "社の石段。",
+      "h3_prompt": "Clean anime cel illustration, keep the exact same clean line art, light soft cel shading and character coloring of the input image throughout. Elegant Japanese dark fantasy: deep indigo-black night (#16162a), gold accents only as thin lines and tiny drifting particles (maki-e lacquerware feeling), dark-purple night sakura, silver mist. Do not change the character design or art style.\n\nScene: A graceful young shrine maiden with black fox ears with white fur inside, very long straight black hair that fades into vivid blue toward the tips, parted bangs, violet eyes with a small beauty mark under the left eye, wearing a white kosode with wide sleeves, a long red hakama with a large bow at the waist, and a big fluffy black fox tail with a white tip. She stands at the top of old stone shrine steps at night, a dark vermilion-black torii silhouette behind her, dark-purple night sakura and silver mist around, faint tiny gold particles floating in the air.\n\nMotion storyboard:\n[0s-3s] She stands in three-quarter view looking down the stone steps with a gentle expression, her fox tail swaying slowly, her long hair moving slightly in the breeze.\n[3s-5s] She notices someone, turns her head and upper body toward the camera, her face brightening into a smile.\n[5s-9s] She tilts her head softly and places one hand lightly against her cheek, and at 5.5s says in Japanese in a gentle, calm, graceful mature woman's voice, soft and smiling, with clear pronunciation, with natural falling intonation: 「こんな夜更けに、どうしたの？眠れないのかしら」\n[9s-10s] She holds the smile, a few gold particles drift past.\n\nCamera: static medium shot (knees up), very slight slow push-in.\n\nAudio: quiet night ambience, soft rustle of the wind, a faint low bell far away, a calm koto-like melody underneath. Her line 「こんな夜更けに、どうしたの？眠れないのかしら」 at 5.5s, close and clear.\n\nNo text, subtitles, logos or watermarks. Keep the clean anime cel look from the first frame to the last frame, no bright festival red, no pale pink or white sakura, no blue sky, no daytime, no white background, do not become photorealistic, do not change the character design.",
+      "input_image": "inputs/cut2_izuna.png",
+      "seed": 20260928,
+      "duration_sec": 10,
+      "dialogue": "5.5s 「こんな夜更けに、どうしたの？眠れないのかしら」"
+    },
+    {
+      "slug": "naruka",
+      "telop": "天守の屋根。",
+      "h3_prompt": "Clean anime cel illustration, keep the exact same clean line art, light soft cel shading and character coloring of the input image throughout. Elegant Japanese dark fantasy: deep indigo-black night (#16162a), gold accents only as thin lines and tiny drifting particles (maki-e lacquerware feeling), dark-purple night sakura, silver mist. Do not change the character design or art style.\n\nScene: A proud young kunoichi with dark brown hair in a high side ponytail decorated with striped hawk feathers and long drill-curl sidelocks, golden eyes, wearing a sleeveless dark brown kimono top with cream stripes, a golden obi with a red cord knot, dark lacquered armor tassets on the hips, detached wide sleeves that end in layered brown-and-cream hawk feathers, black shorts and tall black lace-up boots. She holds a folding fan made of striped hawk feathers in her right hand. She stands on the dark tiled roof of a castle keep high above the sleeping town at night, the town's tiny warm lights far below, dark-purple night sakura petals carried up by the wind, silver mist.\n\nMotion storyboard:\n[0s-3s] She stands in three-quarter view looking down over the town with a confident smile, slowly fanning herself with the feather fan, the feathers on her sleeves fluttering in the high wind.\n[3s-5s] She notices someone, turns her head and upper body toward the camera, her face brightening into a smile.\n[5s-9s] She snaps the feather fan shut and points it lightly toward the camera with a haughty smile, and at 5.5s says in Japanese in a proud, confident, high-pitched and clear young lady's voice with an elegant ojousama tone, with natural falling intonation: 「ごきげんよう。わたくしを探していらしたのでしょう？」\n[9s-10s] She holds the smile, a few gold particles drift past.\n\nCamera: static medium shot (knees up), very slight slow push-in.\n\nAudio: quiet night ambience, soft rustle of the wind, a faint low bell far away, a calm koto-like melody underneath. Her line 「ごきげんよう。わたくしを探していらしたのでしょう？」 at 5.5s, close and clear.\n\nNo text, subtitles, logos or watermarks. Keep the clean anime cel look from the first frame to the last frame, no bright festival red, no pale pink or white sakura, no blue sky, no daytime, no white background, do not become photorealistic, do not change the character design.",
+      "input_image": "inputs/cut3_naruka.png",
+      "seed": 20260928,
+      "duration_sec": 10,
+      "dialogue": "5.5s 「ごきげんよう。わたくしを探していらしたのでしょう？」"
+    }
+  ],
+  "render": {
+    "crossfade_sec": 0.5,
+    "final_fadeout_sec": 1.5,
+    "layout": "fullbleed",
+    "title": {
+      "enabled": false
+    }
+  }
+}

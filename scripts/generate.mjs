@@ -8,6 +8,12 @@
  *   node scripts/generate.mjs episodes/ep001_chiisana-ichinichi --turbo       # Turbo LoRA雛形(v1.2・4steps)で高速生成
  *   node scripts/generate.mjs episodes/ep001_chiisana-ichinichi --turbo-v4    # 旧Turbo LoRA(v4_step600・8steps)。比較・切り戻し用
  *   node scripts/generate.mjs episodes/ep001_chiisana-ichinichi --collect     # 投入済みジョブの回収のみ(再投入しない)
+ *   node scripts/generate.mjs episodes/ep001_sakuya-no-yoru --ref2v           # 【本作の標準】Ref2VA+AddGuide(D案)
+ *
+ * --ref2v: 起点画像(input_image)を1フレーム目に固定しつつ、cut.refs の正典シート(<Picture N>)と
+ *   ボイス見本(<Audio N>)を参照させる(Ref2VA + Ref2V Turbo LoRA 8step)。
+ *   h3_prompt 側で <Picture 1> 等の役割を明示すること(templates/h3_prompt_template.md)。
+ *   2026-09-28 に i2v(A)/Ref2VA単体(B)と比較して標準化(docs/pipeline-design.md §6)
  *
  * --collect: 投入時に assets/.jobs.json へ記録した prompt_id を読み、完了を待って回収する。
  *   監視プロセスが途中で落ちても ComfyUI 側のキューは走り続けるので、これで拾い直せる。
@@ -28,6 +34,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const WORKFLOW_TEMPLATE = path.join(ROOT, "comfyui", "video_minimax_h3_i2v.json");
 const WORKFLOW_TEMPLATE_TURBO = path.join(ROOT, "comfyui", "video_minimax_h3_i2v_turbo.json");
 const WORKFLOW_TEMPLATE_TURBO_V4 = path.join(ROOT, "comfyui", "video_minimax_h3_i2v_turbo_v4.json");
+const WORKFLOW_TEMPLATE_REF2V = path.join(ROOT, "comfyui", "video_minimax_h3_ref2v_guide_turbo.json");
 
 // ワークフロー内の差し替え対象ノードID
 const NODE = {
@@ -38,6 +45,41 @@ const NODE = {
   resolution: "115",   // ResolutionSelector .inputs.aspect_ratio / .megapixels
   save: "92",          // SaveVideo .inputs.filename_prefix
 };
+
+// --ref2v 雛形の差し替え対象ノードID
+const NODE_REF2V = {
+  prompt: "136",       // MiniMaxH3ReferenceToVideo .inputs.prompt
+  image: "157",        // LoadImage(AddGuide で frame 0 に固定する起点画像)
+  seed: "129",
+  duration: "132",
+  resolution: "115",
+  save: "92",
+  refImages: ["137", "139"], // 雛形の参照画像 LoadImage(cut.refs.images の枚数に合わせて作り直す)
+  refAudio: "150",           // 雛形の参照音声 LoadAudio
+};
+
+/** cut.refs の参照画像・音声をアップロードし、Ref2VA ノードの入力を作り直す */
+async function applyRefs(wf, cut, episodeDir) {
+  const refs = cut.refs ?? {};
+  const images = refs.images ?? [];
+  const audios = refs.audios ?? [];
+  if (images.length === 0) throw new Error(`[${cut.slug}] --ref2v には cut.refs.images(正典シート)が必要です`);
+  if (images.length > 9 || audios.length > 3) throw new Error(`[${cut.slug}] 参照は画像9枚・音声3本まで`);
+  const r2v = wf[NODE_REF2V.prompt].inputs;
+  for (const id of [...NODE_REF2V.refImages, NODE_REF2V.refAudio]) delete wf[id];
+  for (const k of Object.keys(r2v)) if (/^ref_(images|audios)./.test(k)) delete r2v[k];
+  for (const [i, rel] of images.entries()) {
+    const id = `ref_image_${i}`;
+    wf[id] = { inputs: { image: await uploadImage(path.resolve(episodeDir, rel)) }, class_type: "LoadImage", _meta: { title: `Picture ${i + 1}` } };
+    r2v[`ref_images.ref_image_${i}`] = [id, 0];
+  }
+  for (const [i, rel] of audios.entries()) {
+    const id = `ref_audio_${i}`;
+    wf[id] = { inputs: { audio: await uploadImage(path.resolve(episodeDir, rel)) }, class_type: "LoadAudio", _meta: { title: `Audio ${i + 1}` } };
+    r2v[`ref_audios.ref_audio_${i}`] = [id, 0];
+  }
+  if (!cut.h3_prompt.includes("<Picture 1>")) log(`[${cut.slug}] 警告: h3_prompt に <Picture 1> の役割指定がありません`);
+}
 
 const POLL_INTERVAL_MS = 10_000;          // 10秒ごとにポーリング
 const CUT_TIMEOUT_MS = 40 * 60 * 1000;    // 1カット40分でタイムアウト(通常10分程度)
@@ -160,6 +202,8 @@ async function main() {
   const args = process.argv.slice(2);
   const turboV4 = args.includes("--turbo-v4");
   if (turboV4) args.splice(args.indexOf("--turbo-v4"), 1);
+  const ref2v = args.includes("--ref2v");
+  if (ref2v) args.splice(args.indexOf("--ref2v"), 1);
   const turbo = args.includes("--turbo");
   if (turbo) args.splice(args.indexOf("--turbo"), 1);
   const collectOnly = args.includes("--collect");
@@ -169,7 +213,7 @@ async function main() {
   const positional = onlyIdx >= 0 ? args.filter((a, i) => i !== onlyIdx && i !== onlyIdx + 1) : args;
   const episodeDir = path.resolve(positional[0] ?? "");
   if (!args[0]) {
-    console.error("使い方: node scripts/generate.mjs <episodesフォルダ> [--only <cut slug>] [--turbo | --turbo-v4] [--collect]");
+    console.error("使い方: node scripts/generate.mjs <episodesフォルダ> [--only <cut slug>] [--ref2v | --turbo | --turbo-v4] [--collect]");
     process.exit(1);
   }
 
@@ -187,7 +231,9 @@ async function main() {
     return;
   }
 
-  const templatePath = turboV4 ? WORKFLOW_TEMPLATE_TURBO_V4 : turbo ? WORKFLOW_TEMPLATE_TURBO : WORKFLOW_TEMPLATE;
+  const templatePath = ref2v ? WORKFLOW_TEMPLATE_REF2V : turboV4 ? WORKFLOW_TEMPLATE_TURBO_V4 : turbo ? WORKFLOW_TEMPLATE_TURBO : WORKFLOW_TEMPLATE;
+  const N = ref2v ? NODE_REF2V : NODE;
+  if (ref2v) log("Ref2VA+AddGuide モード (Ref2V Turbo LoRA v1.0 / 8 steps / euler / beta)");
   const template = JSON.parse(await fs.readFile(templatePath, "utf8"));
   if (turbo) log("Turbo LoRA モード (v1.2 / 4 steps / euler / beta)");
   if (turboV4) log("旧Turbo LoRA モード (v4_step600 / 8 steps / euler / beta)");
@@ -211,14 +257,15 @@ async function main() {
     log(`${label}: 画像アップロード完了 (${uploadedName})`);
 
     const wf = structuredClone(template);
-    wf[NODE.prompt].inputs.prompt = cut.h3_prompt;
-    wf[NODE.image].inputs.image = uploadedName;
-    wf[NODE.seed].inputs.noise_seed = cut.seed;
-    wf[NODE.duration].inputs.value = cut.duration_sec;
-    wf[NODE.save].inputs.filename_prefix = `video/${script.episode_slug}/cut${cut.index}_${cut.slug}`;
+    wf[N.prompt].inputs.prompt = cut.h3_prompt;
+    wf[N.image].inputs.image = uploadedName;
+    wf[N.seed].inputs.noise_seed = cut.seed;
+    wf[N.duration].inputs.value = cut.duration_sec;
+    wf[N.save].inputs.filename_prefix = `video/${script.episode_slug}/cut${cut.index}_${cut.slug}`;
     // 解像度はエピソード共通設定(script.json の resolution)があれば上書き
-    if (script.resolution?.aspect_ratio) wf[NODE.resolution].inputs.aspect_ratio = script.resolution.aspect_ratio;
-    if (script.resolution?.megapixels) wf[NODE.resolution].inputs.megapixels = script.resolution.megapixels;
+    if (script.resolution?.aspect_ratio) wf[N.resolution].inputs.aspect_ratio = script.resolution.aspect_ratio;
+    if (script.resolution?.megapixels) wf[N.resolution].inputs.megapixels = script.resolution.megapixels;
+    if (ref2v) await applyRefs(wf, cut, episodeDir);
 
     const queued = await fetchJson(`${COMFY}/prompt`, {
       method: "POST",

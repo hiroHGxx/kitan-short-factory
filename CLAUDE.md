@@ -8,7 +8,8 @@ ComfyUI(MiniMax H3 Turbo)で音声付きクリップを生成、Remotionで 1080
 パイプラインを流用して 2026-09-28 に立ち上げた。**あちらは参照元。変更しないこと。**
 
 - 公式ページ: https://vibe.co.jp/luna-occulta/fanworks
-- 生成経路(起点画像をどう用意するか)の検討結果と検証計画: **`docs/pipeline-design.md`**(着手時にまず読む)
+- 生成経路の検討・検証結果: **`docs/pipeline-design.md`**(着手時にまず読む)。
+  **標準経路 = D案**: codex CLI で起点画像 → Ref2VA+AddGuide(1フレーム目固定)で正典シート+公式ボイス見本を参照(`generate.mjs --ref2v`)。2026-09-28 検証で決定
 
 ## 二次創作ガイドライン(必ず守る)
 
@@ -38,12 +39,14 @@ MCPは認証不要のHTTPサーバー。接続: `claude mcp add --transport http
 
 | パス | 役割 |
 |---|---|
-| `comfyui/video_minimax_h3_i2v.json` / `_turbo.json` | H3 i2v(FL2VA)雛形。Turboは FL2V turbo v1.2 4steps(姉妹プロジェクトで検証済み) |
-| `scripts/generate.mjs` | script.json の全カットをComfyUIへ投入し `assets/cut{N}_{slug}.mp4` を回収。`--turbo` / `--only` / `--collect` |
+| `comfyui/video_minimax_h3_ref2v_guide_turbo.json` | **標準**。Ref2VA+AddGuide(D案)。Ref2V Turbo LoRA v1.0 768p rank64 / 8steps。10秒で約5分・VRAMピーク11.7GB |
+| `comfyui/video_minimax_h3_ref2v_turbo.json` | Ref2VA 参照のみ(B案・比較用) |
+| `comfyui/video_minimax_h3_i2v.json` / `_turbo.json` | H3 i2v(FL2VA)雛形(A案)。Turboは FL2V turbo v1.2 4steps |
+| `scripts/generate.mjs` | script.json の全カットをComfyUIへ投入し `assets/cut{N}_{slug}.mp4` を回収。`--ref2v`(標準) / `--turbo` / `--only` / `--collect` |
 | `scripts/render.mjs` | Remotionで `out/{episode_slug}.mp4` と作品ノートを書き出す |
 | `scripts/extract-frames.mjs` | 各カットの中間・終盤フレームを `check/` に抽出 |
 | `scripts/new-episode.mjs` | `episodes/epNNN_{slug}/{inputs,assets,out}` を作成 |
-| `templates/` | script.json スキーマ、h3_prompt 6ブロック構造、起点画像依頼文雛形(**いずれも姉妹プロジェクト由来。画風維持文=水彩の部分は本作の画風に合わせて書き換えること**) |
+| `templates/` | script.json スキーマ(`refs`=参照シート・ボイス)、h3_prompt 7ブロック構造(本作の画風維持文・References)、codex 起点画像依頼文雛形 |
 | `renderer/` | Remotionプロジェクト(`npm install` が必要) |
 | `refs/` | 公式素材のローカルキャッシュ(git管理外) |
 | `docs/` | 設計・検証メモ |
@@ -54,6 +57,8 @@ MCPは認証不要のHTTPサーバー。接続: `claude mcp add --transport http
 - ComfyUI(`D:\AI\ComfyUI_windows_portable\ComfyUI`、v0.37.0)が http://127.0.0.1:8188 で起動している必要がある
 - GPUは RTX 4070 SUPER 12GB。ComfyUIは `--reserve-vram 2.0` で起動
 - ワークフロー雛形の差し替えノードID(i2v): プロンプト=`105:104`, 画像=`114`, seed=`105:15`, 尺(秒)=`105:111`, 解像度=`115`, 保存プレフィックス=`92`
+- 同(ref2v_guide): プロンプト=`136`, 起点画像=`157`(AddGuide `147` で frame 0), seed=`129`, 尺(秒)=`132`, 解像度=`115`, 保存=`92`。参照画像・音声ノードは `cut.refs` から generate.mjs が作り直す
+- セリフの文字起こし確認: `D:/AI/tools/whisper.cpp`(冒頭の短い語を落とすことがあるので最終判定は耳で)
 - カット尺: H3は `max(5, round(秒*24))` を17系に丸めたフレーム数(24fps)。10秒指定は実尺10.125秒
 - 監視プロセスが落ちても ComfyUI のキューは継続する → 再投入せず `generate.mjs --collect` で回収
 - ComfyUIのバージョンが変わると同一seedでも別の絵になる
@@ -62,7 +67,7 @@ MCPは認証不要のHTTPサーバー。接続: `claude mcp add --transport http
 
 ```bash
 node scripts/new-episode.mjs ep001_{slug}
-node scripts/generate.mjs episodes/ep001_{slug} --turbo
+node scripts/generate.mjs episodes/ep001_{slug} --ref2v
 node scripts/generate.mjs episodes/ep001_{slug} --collect
 node scripts/extract-frames.mjs episodes/ep001_{slug}
 node scripts/render.mjs episodes/ep001_{slug}

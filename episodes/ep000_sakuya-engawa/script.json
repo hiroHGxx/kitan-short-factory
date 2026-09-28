@@ -1,0 +1,37 @@
+{
+  "title": "縁側の咲耶",
+  "episode_slug": "ep000_sakuya-engawa",
+  "concept": "生成経路の比較検証用(非公開)。同じ10秒1カットを A: i2v+codex起点画像 と B: Ref2VA(正典シート+公式ボイス参照)で生成し、見た目・声・構図・速度・VRAMを比べる。docs/pipeline-design.md §4。",
+  "resolution": {
+    "aspect_ratio": "9:16 (Portrait Widescreen)",
+    "megapixels": 0.4
+  },
+  "cuts": [
+    {
+      "slug": "engawa",
+      "telop": "月蝕の夜。",
+      "h3_prompt": "Clean anime cel illustration, with the exact same clean line art, light soft cel shading and character coloring as <Picture 1>. Elegant Japanese dark fantasy: deep indigo-black night (#16162a), gold accents only as thin lines and tiny drifting particles (maki-e lacquerware feeling), dark-purple night sakura, silver mist. Do not change the character design or art style.\n\nReferences: <Picture 1> (full-body front view) and <Picture 2> (turnaround sheet and facial expressions) are the character reference for the girl: use them for her face, hairstyle, eye color and outfit only, ignore their plain background. <Audio 1> is the reference for her voice: she speaks with the same voice timbre as <Audio 1>.\n\nScene: A young kunoichi girl with long glossy black hair in a high ponytail tied with a red ribbon, straight blunt bangs, warm brown eyes, wearing a short pink kimono top with black collar trim, a black obi with a gold cord knot, black arm guards, black shorts and tall black boots. She stands on a dark wooden engawa veranda of an old Japanese mansion at night, deep dark-purple (#5C4470) night sakura blossoms and petals falling slowly, under a deep indigo-black night sky, a dark eclipsed moon with only a thin crimson corona rim in the upper right sky.\n\nMotion storyboard:\n[0s-3s] She stands in profile gazing up at the night sakura, ponytail and ribbon swaying gently in the breeze, calm breathing.\n[3s-5s] She notices someone, turns her head and upper body toward the camera, her face brightening into a confident grin.\n[5s-9s] She puts one hand on her hip and at 5.5s says in Japanese in a bright, clear, confident young woman's voice with natural falling intonation (来た来た is pronounced \"kita kita\"): 「来た来た。あんたの顔見ると、調子出るんだよね」\n[9s-10s] She holds the cheerful grin, a few gold particles drift past.\n\nCamera: static medium shot (knees up), very slight slow push-in.\n\nAudio: quiet night ambience, soft rustle of sakura branches in the wind, a faint low bell far away, a calm koto-like melody underneath. Her line 「来た来た。あんたの顔見ると、調子出るんだよね」 at 5.5s, close and clear.\n\nNo text, subtitles, logos or watermarks. Keep the clean anime cel look from the first frame to the last frame, no bright festival red, no pale pink or white sakura, no blue sky, no daytime, no white background, do not become photorealistic, do not change the character design.",
+      "input_image": "inputs/cut1_engawa.png",
+      "refs": {
+        "images": [
+          "inputs/sakuya_canon.webp",
+          "inputs/sakuya_sheet.webp"
+        ],
+        "audios": [
+          "inputs/sakuya_sample.wav"
+        ]
+      },
+      "seed": 20260928,
+      "duration_sec": 10,
+      "dialogue": "5.5s 咲耶「来た来た。あんたの顔見ると、調子出るんだよね」(検証D案で採用した最終形)"
+    }
+  ],
+  "render": {
+    "crossfade_sec": 0.5,
+    "final_fadeout_sec": 1.5,
+    "layout": "fullbleed",
+    "title": {
+      "enabled": false
+    }
+  }
+}

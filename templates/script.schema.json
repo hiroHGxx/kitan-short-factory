@@ -68,6 +68,21 @@
             "minimum": 1,
             "description": "生成尺(秒)。通常10。実際のフレーム数はComfyUI側で17の倍数系に丸められ、10秒指定→10.125秒になる"
           },
+          "refs": {
+            "type": "object",
+            "description": "--ref2v 用の参照素材(エピソードフォルダからの相対パス)。h3_prompt の <Picture N> / <Audio N> は配列の順番に対応する",
+            "additionalProperties": false,
+            "properties": {
+              "images": {
+                "type": "array", "minItems": 1, "maxItems": 9, "items": { "type": "string" },
+                "description": "正典シート等 (例: [\"inputs/sakuya_canon.webp\", \"inputs/sakuya_sheet.webp\"])"
+              },
+              "audios": {
+                "type": "array", "maxItems": 3, "items": { "type": "string" },
+                "description": "公式ボイス見本WAV (例: [\"inputs/sakuya_sample.wav\"])"
+              }
+            }
+          },
           "dialogue": {
             "type": "string",
             "description": "セリフ・人間チェック用メモ(生成には使われない)"
