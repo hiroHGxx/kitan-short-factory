@@ -8,7 +8,8 @@ ComfyUI(MiniMax H3 Turbo)で音声付きクリップを生成、Remotionで 1080
 パイプラインを流用して 2026-09-28 に立ち上げた。**あちらは参照元。変更しないこと。**
 
 - 公式ページ: https://vibe.co.jp/luna-occulta/fanworks
-- 生成経路の検討・検証結果: **`docs/pipeline-design.md`**(着手時にまず読む)。
+- **制作の運用手順: `.claude/skills/kitan-short-factory/SKILL.md`**(動画を作るときはこれに従う)
+- 生成経路の検討・検証結果: **`docs/pipeline-design.md`**。
   **標準経路 = D案**: codex CLI で起点画像 → Ref2VA+AddGuide(1フレーム目固定)で正典シート+公式ボイス見本を参照(`generate.mjs --ref2v`)。2026-09-28 検証で決定
 
 ## 二次創作ガイドライン(必ず守る)

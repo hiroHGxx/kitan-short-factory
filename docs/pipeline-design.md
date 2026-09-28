@@ -53,7 +53,7 @@
 - [x] Ref2VA 本体(約21GB)+ Ref2V Turbo LoRA をダウンロード
 - [x] ComfyUI の公式テンプレートから Ref2VA の API ワークフローを作成(`comfyui/video_minimax_h3_ref2v_turbo.json` / `_guide_turbo.json`)
 - [x] 同じ10秒1カット(セリフあり)を A と B で生成し比較 → D も追加し、3キャラで B/D を再比較(§6)
-- [ ] SKILL.md(運用手順)を作る
+- [x] SKILL.md(運用手順)を作る → `.claude/skills/kitan-short-factory/SKILL.md`
 
 ## 5. 画風について
 
